@@ -8,6 +8,23 @@
 #include "proc.h"
 
 int
+sys_wolfie(void)
+{
+  char *buffer;
+
+  if(argstr(0, &buffer) < 0)
+    return -1;
+
+  int i;
+  for (i = 0; i < 3935; i++) {
+    buffer[i] = 'X';
+  }
+  buffer[i] = '\0';
+
+  return 0;
+}
+
+int
 sys_fork(void)
 {
   return fork();
