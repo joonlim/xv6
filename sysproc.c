@@ -15,9 +15,48 @@ sys_wolfie(void)
   if(argstr(0, &buffer) < 0)
     return -1;
 
+  // picture created on http://picascii.com/
+  // image: http://grfx.cstv.com/schools/ston/graphics/ston-13-hdr-logo.png
+  char wolfie_string[] = "\
+  \n\
+                                #++';;;;'++#                \n\
+                               #            #               \n\
+                     #;;;.....@              @.....;;;#     \n\
+                     '       ..              ..       ;     \n\
+                     #       #                #       #     \n\
+                      '     +                  +     '      \n\
+                      .     ,'''+''''++''''+''',     ,      \n\
+                       #                            #       \n\
+                       `+  +'':@@@#      #@@@:''+  +`       \n\
+                         ##    #   '`  `'   #    ##         \n\
+                         '#``  # :@ +::+ @: #  ``#'         \n\
+                        `+` ., +,,'`    `',,+ ,. `+`        \n\
+                      :+     `' #          @ ;`     +:      \n\
+                     #         @            @         #     \n\
+                    .          :            :          .    \n\
+                    #          ,   `####`   :          #    \n\
+                   `           `.``.@@@@,``..           .   \n\
+                   #           #    @@@@    #           #   \n\
+                   `           #      ,     #           `   \n\
+                  #`           #      ,     #           `@  \n\
+                    .+#''.     #  ; .;:, ;  #     ,''#+.    \n\
+                          .;''+@,,'@ @' @',,@+'';.          \n\
+                            # @ `: #`.:`# :` @ #            \n\
+                            # `:@;@ '  ' @;@:` #            \n\
+                            @  @`,        ,`@  @            \n\
+                            ', ' @        @ ' ,'            \n\
+                              ,++;        ;++,              \n\
+                                ;`#,,,,,,#`'                \n\
+                                 +        +                 \n\
+                                 ``      ``                 \n\
+  \n\
+  ";
+
+  char cur = wolfie_string[0];
   int i;
-  for (i = 0; i < 3935; i++) {
-    buffer[i] = 'X';
+  for (i = 0; cur != '\0'; i++) {
+    cur = wolfie_string[i];
+    buffer[i] = cur;
   }
   buffer[i] = '\0';
 
