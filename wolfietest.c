@@ -6,8 +6,9 @@
 int
 main(int argc, char *argv[])
 {
-  char buffer[3000];
-  wolfie(buffer);
+  uint size = 2736;
+  char buffer[size];
+  wolfie(buffer, size);
   printf(1, "Output of wolfie: \n%s\n", buffer);
   exit();
 }
