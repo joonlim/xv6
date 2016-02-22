@@ -1,14 +1,12 @@
 #include "types.h"
-#include "stat.h"
 #include "user.h"
-#include "fs.h"
 
 int
 main(int argc, char *argv[])
 {
-  uint size = 2736;
+  const uint size = 2604;
   char buffer[size];
-  wolfie(buffer, size);
-  printf(1, "Output of wolfie: \n%s\n", buffer);
+  if (wolfie(buffer, size) != -1)
+    printf(1, "%s", buffer);
   exit();
 }

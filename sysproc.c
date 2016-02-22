@@ -10,15 +10,6 @@
 int
 sys_wolfie(void)
 {
-  void *buf;
-  uint *size;
-
-  if ((argptr(0, (void*)&buf, sizeof(*buf)) < 0) || (argint(2, (int*) &size) < 0))
-    return -1;
-
-  if (*size < 2736)
-    return -1;
-
   // picture created on http://picascii.com/
   // image: http://grfx.cstv.com/schools/ston/graphics/ston-13-hdr-logo.png
   char wolfie[] = "\
@@ -67,10 +58,17 @@ sys_wolfie(void)
                                               ``.....```\n\
                                                 ``````\n\
   \n\
-  ";  
+  ";
 
-  memmove(buf, wolfie, 2736);
+  const uint len = 2604;
+  void *buf;
+  uint size;  
+  if ((argptr(0, (void*)&buf, sizeof(*buf)) < 0) || (argint(1, (int*)&size) < 0))
+    return -1;
+  if (size < len)
+    return -1;
 
+  memmove(buf, wolfie, len);
   return 0;
 }
 
