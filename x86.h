@@ -39,6 +39,12 @@ outsl(int port, const void *addr, int cnt)
                "cc");
 }
 
+static inline void 
+invlpg(void *addr)
+{ 
+	__asm __volatile("invlpg (%0)" : : "r" (addr) : "memory");
+}  
+
 static inline void
 stosb(void *addr, int data, int cnt)
 {
