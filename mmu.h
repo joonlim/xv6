@@ -24,6 +24,11 @@
 #define FL_VIP          0x00100000      // Virtual Interrupt Pending
 #define FL_ID           0x00200000      // ID flag
 
+// Page fault error codes
+#define FEC_PR		0x00000001	// Page fault caused by protection violation
+#define FEC_WR		0x00000002	// Page fault caused by a write
+#define FEC_U		0x00000004	// Page fault occured while in user mode
+
 // Control Register flags
 #define CR0_PE          0x00000001      // Protection Enable
 #define CR0_MP          0x00000002      // Monitor coProcessor

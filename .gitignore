@@ -14,3 +14,5 @@ kernel
 kernelmemfs
 mkfs
 .gdbinit
+a.out
+.swp
