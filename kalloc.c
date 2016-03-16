@@ -70,8 +70,7 @@ freerange(void *vstart, void *vend)
     kfree(p);
 }
 
-// Called by _freerange, which is only called by kinit1, kinit2,
-// and also freevm and deallocvm in vm.c.
+// Called by _freerange, which is only called by kinit1, kinit2.
 void
 _kfree(char *v)
 {
