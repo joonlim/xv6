@@ -65,8 +65,13 @@ void            ioapicinit(void);
 // kalloc.c
 char*           kalloc(void);
 void            kfree(char*);
+void            _kfree(char *v);
 void            kinit1(void*, void*);
 void            kinit2(void*, void*);
+void            incref(char*);
+void            decref(char*);
+uint            getref(char*);
+void            printref(char*);
 
 // kbd.c
 void            kbdintr(void);
