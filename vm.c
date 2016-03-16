@@ -265,7 +265,8 @@ deallocuvm(pde_t *pgdir, uint oldsz, uint newsz)
       if(pa == 0)
         panic("kfree");
       char *v = p2v(pa);
-      kfree(v);
+      if (getref(v) == 1) // make sure this doesn't free shared pages
+        kfree(v);
       *pte = 0;
     }
   }
