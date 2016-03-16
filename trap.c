@@ -32,25 +32,59 @@ idtinit(void)
   lidt(idt, sizeof(idt));
 }
 
-/**
- * Page fault handler
- */
 void
 pgfault(struct trapframe *tf)
 {
-  // currently copy default behavior
-  if(proc == 0 || (tf->cs&3) == 0){
-    // In kernel, it must be our mistake.
-    cprintf("unexpected trap %d from cpu %d eip %x (cr2=0x%x)\n",
-            tf->trapno, cpu->id, tf->eip, rcr2());
-    panic("trap");
+  char *va;
+  pde_t *pde; // page dir entry
+  pte_t *pte; // page table entry
+  uint pa; // physical address
+
+  if (!(tf->err & FEC_WR)) {
+    cprintf("pgfault: FEC_WR fault failed\n");
+    proc->killed = 1;
+    return;
   }
-  // In user space, assume process misbehaved.
-  cprintf("pid %d %s: trap %d err %d on cpu %d "
-          "eip 0x%x addr 0x%x--kill proc\n",
-          proc->pid, proc->name, tf->trapno, tf->err, cpu->id, tf->eip, 
-          rcr2());
-  proc->killed = 1;
+
+  va = (char*)PGROUNDDOWN(rcr2());
+  pde = &(proc->pgdir[PDX(va)]); // get page directory entry
+  if(*pde & PTE_P){
+    pte_t *pgtab = (pte_t*)p2v(PTE_ADDR(*pde)); // get page table
+    pte = &(pgtab[PTX(va)]); // get page table entry
+    if(!(*pte & PTE_P)){
+      panic("pgfault: page not present");
+    }
+    pa = PTE_ADDR(*pte);
+  } else {
+    panic("pgfault: pgtab should exist");
+  }
+
+  if (*pte & PTE_COW) {
+    // ALL GOOD HERE
+    uint ref = getref((char*)p2v(pa));
+    if (ref == 1) {
+      *pte = (*pte & ~PTE_COW) | PTE_W | PTE_P;
+    } else {
+      // copy the page and replace it with a writable copy in the local process
+      char *mem;
+      uint flags = PTE_FLAGS(*pte) | PTE_W | PTE_P;
+      mem = kalloc();
+      if(mem == 0){
+        cprintf("pgfault: out of memory\n");
+        proc->killed = 1;
+        return;
+      }
+      decref((char*)p2v(pa));
+      memmove(mem, (char*)p2v(pa), PGSIZE);
+      *pte = v2p(mem) | flags | PTE_P; // map
+    }
+    invlpg((char*)p2v(pa));
+
+  } else {
+    cprintf("pgfault: page accessed incorrectly\n");
+    proc->killed = 1;
+    return;
+  }
 }
 
 //PAGEBREAK: 41
@@ -68,10 +102,7 @@ trap(struct trapframe *tf)
   }
 
   if(tf->trapno == T_PGFAULT){
-    cprintf("--------------------------------------------\n");
-    cprintf("T_PGFAULT: ");
     pgfault(tf);
-    cprintf("--------------------------------------------\n");
     if(proc->killed)
       exit();
     return;
@@ -107,8 +138,7 @@ trap(struct trapframe *tf)
     cprintf("cpu%d: spurious interrupt at %x:%x\n",
             cpu->id, tf->cs, tf->eip);
     lapiceoi();
-    break;
-   
+    break;   
   //PAGEBREAK: 13
   default:
     if(proc == 0 || (tf->cs&3) == 0){
