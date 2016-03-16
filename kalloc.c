@@ -110,11 +110,12 @@ kfree(char *v)
     acquire(&kmem.lock);
   r = &kmem.runs[(V2P(v) / PGSIZE)];
   if (r->ref != 1) {
+    // assert ref == 1
     cprintf("kfree: assert ref == 1 failed\n");
     cprintf("0x%x %d\n", r, r->ref);
-    // if(kmem.use_lock)
-    //   release(&kmem.lock);
-    // exit();
+    if(kmem.use_lock)
+      release(&kmem.lock);
+    exit();
   }
   r->next = kmem.freelist;
   kmem.freelist = r;
