@@ -112,8 +112,10 @@ kfree(char *v)
   r = &kmem.runs[(V2P(v) / PGSIZE)];
   if (r->ref != 1) {
     cprintf("kfree: assert ref == 1 failed\n");
-    cprintf("%d\n", r->ref);
-    exit();
+    cprintf("0x%x %d\n", r, r->ref);
+    // if(kmem.use_lock)
+    //   release(&kmem.lock);
+    // exit();
   }
   r->next = kmem.freelist;
   kmem.freelist = r;
@@ -159,7 +161,6 @@ incref(char* v)
     acquire(&kmem.lock);
   r = &kmem.runs[(V2P(v) / PGSIZE)];
   r->ref++;
-  cprintf("incref: address: 0x%p, ref: %d\n", r, r->ref);
   if(kmem.use_lock)
     release(&kmem.lock);
 }
@@ -180,7 +181,6 @@ decref(char* v)
     acquire(&kmem.lock);
   r = &kmem.runs[(V2P(v) / PGSIZE)];
   r->ref--;
-  cprintf("decref: address: 0x%p, ref: %d\n", r, r->ref);
   if(kmem.use_lock)
     release(&kmem.lock);
 }
