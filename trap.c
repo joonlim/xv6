@@ -32,6 +32,27 @@ idtinit(void)
   lidt(idt, sizeof(idt));
 }
 
+/**
+ * Page fault handler
+ */
+void
+pgfault(struct trapframe *tf)
+{
+  // currently copy default behavior
+  if(proc == 0 || (tf->cs&3) == 0){
+    // In kernel, it must be our mistake.
+    cprintf("unexpected trap %d from cpu %d eip %x (cr2=0x%x)\n",
+            tf->trapno, cpu->id, tf->eip, rcr2());
+    panic("trap");
+  }
+  // In user space, assume process misbehaved.
+  cprintf("pid %d %s: trap %d err %d on cpu %d "
+          "eip 0x%x addr 0x%x--kill proc\n",
+          proc->pid, proc->name, tf->trapno, tf->err, cpu->id, tf->eip, 
+          rcr2());
+  proc->killed = 1;
+}
+
 //PAGEBREAK: 41
 void
 trap(struct trapframe *tf)
@@ -41,6 +62,16 @@ trap(struct trapframe *tf)
       exit();
     proc->tf = tf;
     syscall();
+    if(proc->killed)
+      exit();
+    return;
+  }
+
+  if(tf->trapno == T_PGFAULT){
+    cprintf("--------------------------------------------\n");
+    cprintf("T_PGFAULT: ");
+    pgfault(tf);
+    cprintf("--------------------------------------------\n");
     if(proc->killed)
       exit();
     return;

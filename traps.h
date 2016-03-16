@@ -15,7 +15,8 @@
 #define T_SEGNP         11      // segment not present
 #define T_STACK         12      // stack exception
 #define T_GPFLT         13      // general protection fault
-#define T_PGFLT         14      // page fault
+// #define T_PGFLT         14      // page fault
+#define T_PGFAULT       14      // page fault
 // #define T_RES        15      // reserved
 #define T_FPERR         16      // floating point error
 #define T_ALIGN         17      // aligment check
