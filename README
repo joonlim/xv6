@@ -1,3 +1,60 @@
+Joon Lim
+109558002
+Lab 2
+
+Design process
+
+	1. I first started by merging the new code with my homework 1.
+	
+	2. I then went through exercise 1, by adding a reference count parameter to struct run in kalloc.c and initialized it to 1 inside kalloc().
+
+	3. I added helper function to increment and decrement the previously added reference count. The functions are:
+
+		incref() - increment the reference count of a page descriptor.
+
+		decref() - decrement the reference count of a page descriptor.
+
+	4. After that, I added an assertion inside kfree() to check that the reference count is 1 inside the call. This caused some bugs for me, so I added the function _kfree(), which is identical to kfree() except that there is no assertion. The initialization functions kinit1() and kinit2() call the newly created _kfree() rather than kfree().
+
+		_kfree() - kfree() minus the assertion.
+
+	5. I added some extra helper functions near the bottom of kalloc.c:
+
+		getref() - get the reference count of a page descriptor.
+
+		printref() - print the reference count of a page descriptor.
+
+	6. Next, I added a macro T_PGFAULT to replace the already existing T_PGFLT because the instructions explicitly say "T_PGFAULT."
+
+	6. Then, I continued onto exercise 2, where I registered a page fault handler function pgfault() to handle page faults. At this point, the function simply printed a statement indicating that a page fault occured and exited. trap() calls pgfault() when tf->trapno == T_PGFAULT.
+
+		pgfault() - page fault handler.
+
+	7. I added a unit test pgfaulttest to trigger a page fault to check to see if my function was being properly called.
+
+		pgfaulttest.c - test that deliberately accesses an invalid address to trigger a page fault.
+
+	8. I defined a flag PTE_COW as 0x800 in mmu.h.
+
+	9. I began exercise 4, where I started by creating the function cowuvm(), which allocates a new page directory by setting the pages of the parent process to copy-on-write and read-only, and then adding references to the pages to the new page directory.
+
+		cowuvm() - convert each writable page table entry in the parent and child to read-only and PTE_COW.
+
+	10. I had fork() call cowuvm() instead of copyuvm() in proc.c.
+
+	11. I implemented the page fault handler pgfault().
+
+	12. I had a wicked bug where my program was page faulting every time a process terminated. My fix for the bug is in vm.c line 268, where I added a conditional so that the program wouldn't free pages with a reference count greater than 1.
+
+	13. I added 3 additional unit tests for fork.
+
+		forkunittest1.c
+		forkunittest2.c
+		forkunittest3.c
+
+	14. My code passes forktest, forkunittest1, forkunittest2, and forkunittest3. At my code's current state, it still fails 'usertests'.
+
+--------------------------------------------------------------------------------
 xv6 is a re-implementation of Dennis Ritchie's and Ken Thompson's Unix
 Version 6 (v6).  xv6 loosely follows the structure and style of v6,
 but is implemented for a modern x86-based multiprocessor using ANSI C.
