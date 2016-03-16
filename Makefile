@@ -174,6 +174,9 @@ UPROGS=\
 	_zombie\
 	_wolfietest\
 	_pgfaulttest\
+	_forkunittest1\
+	_forkunittest2\
+	_forkunittest3\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
