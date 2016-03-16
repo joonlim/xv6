@@ -145,8 +145,7 @@ kalloc(void)
 }
 
 /**
- * Increment the reference count of a page descriptor (struct run), and return
- * the new value.
+ * Increment the reference count of a page descriptor.
  */
 void
 incref(char* v)
@@ -165,8 +164,7 @@ incref(char* v)
 }
 
 /**
- * Decrement the reference count of a page descriptor (struct run), and return
- * the new value.
+ * Decrement the reference count of a page descriptor.
  */
 void
 decref(char* v)
@@ -185,7 +183,7 @@ decref(char* v)
 }
 
 /**
- * Get reference count of a page descriptor (struct run).
+ * Get reference count of a page descriptor.
  */
 uint
 getref(char *v)
@@ -195,7 +193,7 @@ getref(char *v)
 }
 
 /**
- * Print reference count of a page descriptor (struct run).
+ * Print reference count of a page descriptor.
  */
 void
 printref(char *v)
