@@ -336,6 +336,42 @@ bad:
   return 0;
 }
 
+// Given a parent process's page table, convert each page table entry to
+// read-only and PTE_COW (copy-on-write). For each page that is shared
+// increment the reference count.
+pde_t*
+cowuvm(pde_t* pgdir, uint sz)
+{
+  pde_t *d;
+  pte_t *pte;
+  uint pa, i, flags;
+  char *mem;
+
+  if((d = setupkvm()) == 0)
+    return 0;
+  for(i = 0; i < sz; i += PGSIZE){
+    if((pte = walkpgdir(pgdir, (void *) i, 0)) == 0)
+      panic("cowuvm: pte should exist");
+    if(!(*pte & PTE_P))
+      panic("cowuvm: page not present");
+    if (*pte & PTE_W)
+      *pte = (*pte & ~PTE_W) | PTE_COW;
+    pa = PTE_ADDR(*pte);
+    flags = (PTE_FLAGS(*pte) & ~PTE_W) | PTE_COW;;
+
+    incref((char*)p2v(pa));
+    invlpg((char*)p2v(pa)); // invalidate tlb
+    mem = p2v(pa);
+    if(mappages(d, (void*)i, PGSIZE, v2p(mem), flags) < 0)
+      goto bad;
+  }
+  return d;
+
+bad:
+  freevm(d);
+  return 0;
+}
+
 //PAGEBREAK!
 // Map user virtual address to kernel address.
 char*
