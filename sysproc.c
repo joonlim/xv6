@@ -8,6 +8,23 @@
 #include "proc.h"
 
 int
+sys_nice(void)
+{
+  int inc;
+  
+  argint(0, &inc);
+
+  if (inc >= 40)
+    proc->nice = 19;
+  else if (inc <= -40)
+    proc->nice = -20;
+  else
+    proc->nice += inc;
+
+  return (int) proc->nice;
+}
+
+int
 sys_wolfie(void)
 {
   // picture created on http://picascii.com/

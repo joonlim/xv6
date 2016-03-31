@@ -89,6 +89,7 @@ extern int sys_kill(void);
 extern int sys_link(void);
 extern int sys_mkdir(void);
 extern int sys_mknod(void);
+extern int sys_nice(void);
 extern int sys_open(void);
 extern int sys_pipe(void);
 extern int sys_read(void);
@@ -123,6 +124,7 @@ static int (*syscalls[])(void) = {
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
 [SYS_wolfie]  sys_wolfie,
+[SYS_nice]    sys_nice
 };
 
 void
