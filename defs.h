@@ -181,6 +181,7 @@ void            clearpteu(pde_t *pgdir, char *uva);
 
 // random.c
 uint            random(void);
+int             randomrange(int, int);
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))

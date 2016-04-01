@@ -8,16 +8,22 @@
 #include "proc.h"
 
 int
+sys_random(void)
+{
+  return random();
+}
+
+int
 sys_nice(void)
 {
   int inc;
   
   argint(0, &inc);
 
-  if (inc >= 40)
-    proc->nice = 19;
-  else if (inc <= -40)
-    proc->nice = -20;
+  if (inc > 20 || proc->nice + inc > 20) // prevent nice val > 20
+    proc->nice = 20;
+  else if (inc < -20 || proc->nice + inc < 0) // prevent nice val < 0
+    proc->nice = 0;
   else
     proc->nice += inc;
 

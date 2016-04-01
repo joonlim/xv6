@@ -22,3 +22,4 @@
 #define SYS_close  21
 #define SYS_wolfie 22
 #define SYS_nice   23
+#define SYS_random 24

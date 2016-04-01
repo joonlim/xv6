@@ -2,7 +2,7 @@
 #include "types.h"
 #include "defs.h"
 
-// Return a number between 0 and ((2^32 - 1) / 2), which is 2147483647.
+// Return a integer between 0 and ((2^32 - 1) / 2), which is 2147483647.
 uint
 random(void)
 {
@@ -19,4 +19,17 @@ random(void)
   z4 = ((z4 & 4294967168U) << 13) ^ b;
 
   return (z1 ^ z2 ^ z3 ^ z4) / 2;
+}
+
+// Return a random integer between a given range.
+int
+randomrange(int lo, int hi)
+{
+  if (hi < lo) {
+    int tmp = lo;
+    lo = hi;
+    hi = tmp;
+  }
+  int range = hi - lo + 1;
+  return random() % (range) + lo;
 }

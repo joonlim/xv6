@@ -47,7 +47,7 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
-  p->nice = 0;
+  p->nice = 20; // assign highest priority.
   release(&ptable.lock);
 
   // Allocate kernel stack.
@@ -255,6 +255,12 @@ wait(void)
   }
 }
 
+uint
+totaltickets(void)
+{
+  return 1000; // dummy
+}
+
 //PAGEBREAK: 42
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
@@ -268,6 +274,8 @@ scheduler(void)
 {
   struct proc *p;
 
+#ifndef LOTTERY
+  // Round Robin
   for(;;){
     // Enable interrupts on this processor.
     sti();
@@ -277,6 +285,8 @@ scheduler(void)
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state != RUNNABLE)
         continue;
+
+      // cprintf("RUN %s, [pid %d]\n", p->name, p->pid);
 
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
@@ -292,8 +302,53 @@ scheduler(void)
       proc = 0;
     }
     release(&ptable.lock);
-
   }
+
+#else
+  // Lottery Ticket Scheduling
+  // compile with -DLOTTERY
+  for(;;){
+    // Enable interrupts on this processor.
+    sti();
+
+    // how to obtain this number:
+    // Each RUNNABLE process has a niceness val between 0 and 20.
+    // The number of tickets they have is 2^nice.
+    // Processes with the lowest priority, 0, would have 2^0 = 1 ticket.
+    // Processes with the highest priority, 20, would have 2^20, 1048576 tickets.
+    // totaltickets() returns the sum of all these.
+    uint totaltickets = totaltickets();
+
+    // hold lottery
+    uint counter = 0; // used to track if we've found the winner yet
+    uint winner = getrandom(0, totaltickets);
+
+    // Loop over process table looking for process to run.
+    acquire(&ptable.lock);
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      if(p->state != RUNNABLE)
+        continue;
+
+      // cprintf("RUN %s, [pid %d]\n", p->name, p->pid);
+
+      // Switch to chosen process.  It is the process's job
+      // to release ptable.lock and then reacquire it
+      // before jumping back to us.
+      proc = p;
+      switchuvm(p);
+      p->state = RUNNING;
+      swtch(&cpu->scheduler, proc->context);
+      switchkvm();
+
+      // Process is done running for now.
+      // It should have changed its p->state before coming back.
+      proc = 0;
+    }
+    release(&ptable.lock);
+  }
+
+#endif
+
 }
 
 // Enter scheduler.  Must hold only ptable.lock
@@ -312,6 +367,9 @@ sched(void)
   if(readeflags()&FL_IF)
     panic("sched interruptible");
   intena = cpu->intena;
+
+  // save instruction ptr into context of this process
+  // switch to context of cpu->scheduler
   swtch(&proc->context, cpu->scheduler);
   cpu->intena = intena;
 }
@@ -322,7 +380,7 @@ yield(void)
 {
   acquire(&ptable.lock);  //DOC: yieldlock
   proc->state = RUNNABLE;
-  sched();
+  sched(); // line 346
   release(&ptable.lock);
 }
 
