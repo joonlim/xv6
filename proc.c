@@ -255,10 +255,44 @@ wait(void)
   }
 }
 
+// Given a nice value, return the number of tickets this process holds
+uint
+numtickets(int nice)
+{
+  int tickets = 1;
+  int i;
+  for (i = 0; i < nice; i++) {
+    tickets = tickets * 2;
+  }
+  return tickets;
+  
+  // return nice + 1; // simple implementation
+}
+
+// Returns the sum of all tickets held by every RUNNABLE process.
+// 
+// Each RUNNABLE process has a niceness val between 0 and 20.
+// The number of tickets they have is 2^nice.
+// Processes with the lowest priority, 0, would have 2^0 = 1 ticket.
+// Processes with the highest priority, 20, would have 2^20, 1048576 tickets.
+// totaltickets() returns the sum of all these.
 uint
 totaltickets(void)
 {
-  return 1000; // dummy
+  struct proc *p;
+  uint total = 0;
+
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->state != RUNNABLE)
+      continue;
+      int nice = p->nice;
+      total += numtickets(nice);
+      // cprintf("%d numtickets: %d\n", p->pid, numtickets(nice));
+
+
+  }
+  return total;
+  // return 1;
 }
 
 //PAGEBREAK: 42
@@ -311,38 +345,55 @@ scheduler(void)
     // Enable interrupts on this processor.
     sti();
 
-    // how to obtain this number:
-    // Each RUNNABLE process has a niceness val between 0 and 20.
-    // The number of tickets they have is 2^nice.
-    // Processes with the lowest priority, 0, would have 2^0 = 1 ticket.
-    // Processes with the highest priority, 20, would have 2^20, 1048576 tickets.
-    // totaltickets() returns the sum of all these.
-    uint totaltickets = totaltickets();
+    // Loop over process table looking for process to run.
+    acquire(&ptable.lock);
+
+    // get total number of tickets by iterating through every process
+    uint total = totaltickets();
+    if (total == 0) {
+      release(&ptable.lock);
+      continue;
+    }
+    // cprintf("total: %d\n", total);
 
     // hold lottery
     uint counter = 0; // used to track if we've found the winner yet
-    uint winner = getrandom(0, totaltickets);
+    uint winner = randomrange(1, (int) total);
+    // cprintf("winner: %d\n", winner);
 
-    // Loop over process table looking for process to run.
-    acquire(&ptable.lock);
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state != RUNNABLE)
         continue;
 
-      // cprintf("RUN %s, [pid %d]\n", p->name, p->pid);
+      int nice = p->nice;
+      counter += numtickets(nice);
+      if (counter < winner)
+        continue;
+
+      // cprintf("Winner: %s, [pid %d]\n", p->name, p->pid);
 
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
       proc = p;
+
       switchuvm(p);
       p->state = RUNNING;
+
       swtch(&cpu->scheduler, proc->context);
       switchkvm();
+
+      proc->nice = proc->nice - 1;
+      // cprintf("new nice: %d\n", p->nice);
+      
+      // test
+      if (proc->nice == 0)
+        proc->nice = 20;
 
       // Process is done running for now.
       // It should have changed its p->state before coming back.
       proc = 0;
+      break;
     }
     release(&ptable.lock);
   }

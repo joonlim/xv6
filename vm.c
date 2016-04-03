@@ -172,6 +172,9 @@ switchuvm(struct proc *p)
   ltr(SEG_TSS << 3);
   if(p->pgdir == 0)
     panic("switchuvm: no pgdir");
+
+  // pass page table to lc3 register
+  // lc3 register tells cpu where page table is
   lcr3(v2p(p->pgdir));  // switch to new address space
   popcli();
 }

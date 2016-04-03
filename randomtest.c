@@ -48,7 +48,17 @@ main(int argc, char *argv[])
     int d = randomrange(0, 10);
     printf(1, "%d ", d);
   }
-  
+
+  printf(1, "\n");
+  printf(1, "random numbers between 1 and 1:\n");
+
+  // random numbers between [
+  for (i = 0; i < NUM_ITEMS; i++) {
+    // int d = random() % 11;
+    int d = randomrange(1, 1);
+    printf(1, "%d ", d);
+  }
+
   printf(1, "\n");
 
   exit();
