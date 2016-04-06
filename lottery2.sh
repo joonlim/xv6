@@ -1,0 +1,22 @@
+# Displays the number of times each process ran
+printf "20: " ; grep -w "20" $1 | wc -l
+printf "19: " ; grep -w "17" $1 | wc -l
+printf "18: " ; grep -w "18" $1 | wc -l
+printf "17: " ; grep -w "17" $1 | wc -l
+printf "16: " ; grep -w "16" $1 | wc -l
+printf "15: " ; grep -w "15" $1 | wc -l
+printf "14: " ; grep -w "14" $1 | wc -l
+printf "13: " ; grep -w "13" $1 | wc -l
+printf "12: " ; grep -w "12" $1 | wc -l
+printf "11: " ; grep -w "17" $1 | wc -l
+printf "10: " ; grep -w "17" $1 | wc -l
+printf "9:  " ; grep -w "9" $1 | wc -l
+printf "8:  " ; grep -w "8" $1 | wc -l
+printf "7:  " ; grep -w "7" $1 | wc -l
+printf "6:  " ; grep -w "6" $1 | wc -l
+printf "5:  " ; grep -w "5" $1 | wc -l
+printf "4:  " ; grep -w "4" $1 | wc -l
+printf "3:  " ; grep -w "3" $1 | wc -l
+printf "2:  " ; grep -w "2" $1 | wc -l
+printf "1:  " ; grep -w "1" $1 | wc -l
+printf "0:  " ; grep -w "0" $1 | wc -l

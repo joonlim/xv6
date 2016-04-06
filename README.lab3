@@ -1,0 +1,87 @@
+Joon Lim
+109558002
+Lab 3
+
+Design Document
+
+Exercise 1
+
+	1. First, I added a "nice" property to struct proc in proc.h implemented the nice() system call, which takes an int and increments/decrements the priority of the calling process and returns the new value. 
+
+		- To "get" the priority value without setting it, call nice(0).
+
+		- In my implementation, the nice value ranges from 0 to 20, where 0 is the LOWEST priority, and 20 is the HIGHEST priority.
+
+		- allocproc() defaults a new process's nice value to 20, defaulting to the highest priority.
+
+		- SYS_nice is defined as 23 in syscall.h.
+
+	2. Then, I added a unit test called nicetest.c to see that nice() and nice(0) work as intended.
+
+		- The test also checks to see that the nice value never goes lower than 0 or higher than 20.
+
+		* TO RUN: type the command "nicetest" in xv6.
+
+Exercise 2
+
+	1. Next, I implemented the defined a function random() in a new file, random.c, which generates a random integer between 0 and ((2^32 - 1) / 2), which is 2147483647.
+
+		- The algorithm I used was taken from "http://stackoverflow.com/questions/1167253/implementation-of-rand".
+
+	2. To test random(), I created a syscall for random() and added a unit test file randomtest.c to test it out.
+
+		- randomtest.c prints the output of 3 loops.
+			
+			- The first loop, prints any random number that can be returned from calling random().
+
+			- The second loop prints random numbers between -99 and 100, inclusive, created using random().
+
+			- The third loop prints random numbers between 0 and 10, inclusive, created using random().
+
+	3. I defined a function randomrange(int, int), which takes a range and returns a random number in the range (inclusive).
+
+Exercise 3
+
+	1. I implemented lottery scheduling in xv6 in proc.c, starting at line 356 of proc.c:
+
+		- To run xv6 with lottery scheduling, the files must be compiled with the -DLOTTERY flag.
+
+		- I added a function luckyincrease() in proc.c, which given an integer x, has a 1/x chance of increasing every RUNNABLE process's nice value to 20 (max). This function is called at the beginning of the loop to increase fairness. The value of x can be tweaked to find optimal fairness.
+
+		- I added a function totaltickets(), which calculates the total amount of tickets contained in all the RUNNABLE processes. The amount of tickets one process has equal to 2^nice. totaltickets() is called before drawing a winner.
+
+		- The winner is found using randomrange().
+
+		- We iterate through all the RUNNABLE processes, incrementing a counter by the number of tickets the RUNNABLE process has, until the winner is found.
+
+		- The winner is scheduled to run, and after it is finished running, it has its nice value decremented by 1.
+
+Exercise 4
+
+	1. I wrote 3 tests to test the lottery scheduling. All three tests fork additional processes and call nice() at different times to appropriately control their priority. To know how often a process is scheduled, we have it print its priority after every 10000 loops, so that the processes aren't busy calling write() all the time.
+
+	To exit a test, exit xv6. Higher prioirity processes should run more often.
+
+		lottery1.c - Tests 4 processes of drasticly different priorities. Tests general functionality.
+
+			To test:
+
+			$ make qemu > a.txt
+				run lottery1 on xv6. after several seconds, exit.
+			$ sh lottery1.sh a.txt
+
+		lottery2.c - Test 20 processes of incrementally different priorities. Tests fairness, and makes sure that even priority of 0 gets to run.
+
+			To test:
+
+			$ make qemu > a.txt
+				run lottery2 on xv6. after several seconds, exit.
+			$ sh lottery2.sh a.txt
+
+		lottery3.c - Test 20 processes of equal priorities. Edge case to test starvation.
+
+			To test:
+
+			$ make qemu > a.txt
+				run lottery3 on xv6. after several seconds, exit.
+			$ sh lottery3.sh a.txt

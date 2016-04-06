@@ -109,6 +109,7 @@ void            exit(void);
 int             fork(void);
 int             growproc(int);
 int             kill(int);
+void            luckyincrease(int);
 uint            numtickets(int);
 void            pinit(void);
 void            procdump(void);

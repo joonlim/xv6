@@ -269,6 +269,23 @@ numtickets(int nice)
   // return nice + 1; // simple implementation
 }
 
+// Roll a number between 0 and x, and if the roll is 0, then increase the
+// priorities of every RUNNABLE proocess to 20 (max).
+void
+luckyincrease(int x)
+{
+  int draw = randomrange(0, x);
+  if (draw == 0) {
+    // change priorities of all RUNNABLE processes to 20
+    struct proc *p;
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      if(p->state != RUNNABLE)
+        continue;
+        p->nice = 20;
+    }
+  }
+}
+
 // Returns the sum of all tickets held by every RUNNABLE process.
 // 
 // Each RUNNABLE process has a niceness val between 0 and 20.
@@ -288,8 +305,6 @@ totaltickets(void)
       int nice = p->nice;
       total += numtickets(nice);
       // cprintf("%d numtickets: %d\n", p->pid, numtickets(nice));
-
-
   }
   return total;
   // return 1;
@@ -348,6 +363,9 @@ scheduler(void)
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
 
+    int x = 200;
+    luckyincrease(x); // approximately every x times this is called, increase all RUNNABLE priorities to 20 (max).
+
     // get total number of tickets by iterating through every process
     uint total = totaltickets();
     if (total == 0) {
@@ -384,11 +402,6 @@ scheduler(void)
       switchkvm();
 
       proc->nice = proc->nice - 1;
-      // cprintf("new nice: %d\n", p->nice);
-      
-      // test
-      if (proc->nice == 0)
-        proc->nice = 20;
 
       // Process is done running for now.
       // It should have changed its p->state before coming back.
