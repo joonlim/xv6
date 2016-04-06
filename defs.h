@@ -114,11 +114,14 @@ void            exit(void);
 int             fork(void);
 int             growproc(int);
 int             kill(int);
+void            luckyincrease(int);
+uint            numtickets(int);
 void            pinit(void);
 void            procdump(void);
 void            scheduler(void) __attribute__((noreturn));
 void            sched(void);
 void            sleep(void*, struct spinlock*);
+uint            totaltickets(void);
 void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
@@ -184,6 +187,10 @@ void            switchuvm(struct proc*);
 void            switchkvm(void);
 int             copyout(pde_t*, uint, void*, uint);
 void            clearpteu(pde_t *pgdir, char *uva);
+
+// random.c
+uint            random(void);
+int             randomrange(int, int);
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
