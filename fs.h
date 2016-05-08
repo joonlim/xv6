@@ -61,6 +61,9 @@ struct dinode {
 // #define IBLOCK(i, sb)     ((i) / IPB + sb.inodestart)
 #define IBLOCK(i, sb)      (IBLOCKGROUPSTART((i), sb) + ((i) % sb.inodeblocksperbgroup))
 
+// First and last inodes of the given block group
+#define FIRSTINODEOFBGROUP(b, sb)  ((b) * sb.inodesperbgroup)
+
 // Bitmap bits per block
 #define BPB           (BSIZE*8)
 
