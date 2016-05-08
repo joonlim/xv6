@@ -81,20 +81,25 @@ balloc(uint dev)
   int b, bi, m;
   struct buf *bp;
 
+  cprintf("balloc: dev: %d\n", dev);
+
   int i = 0;
   for (; i < sb.nblockgroups; i++) {
     int firstblock = BBLOCKGROUPSTART(i, sb);
+    cprintf("balloc: i: %d firstblock: %d\n", i, firstblock);
     b = firstblock + sb.bgroupmeta;
     for (; b < firstblock + sb.bgroupsize; b += BPB) {
       bp = bread(dev, BBLOCK(b, sb));
       // look for free blocks here
       for(bi = 0; bi < BPB && b + bi < sb.size; bi++){
+        cprintf("balloc: checking bmap for block %d...\n", b + bi);
         m = 1 << (bi % 8);
         if((bp->data[bi/8] & m) == 0){  // Is block free?
           bp->data[bi/8] |= m;  // Mark block in use.
           log_write(bp);
           brelse(bp);
           bzero(dev, b + bi);
+          cprintf("balloc: found free block: %d\n", b + bi);
           return b + bi;
         }
       }
@@ -566,6 +571,7 @@ writei(struct inode *ip, char *src, uint off, uint n)
     return -1;
 
   for(tot=0; tot<n; tot+=m, off+=m, src+=m){
+
     bp = bread(ip->dev, bmap(ip, off/BSIZE));
     m = min(n - tot, BSIZE - off%BSIZE);
     memmove(bp->data + off%BSIZE, src, m);
