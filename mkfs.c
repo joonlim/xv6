@@ -16,7 +16,7 @@
 #endif
 
 // #define NINODES 200
-# define NINODES 256
+# define NINODES 512
 
 // Disk layout:
 // [ boot block | sb block | log | inode blocks | free bit map | data blocks ]
