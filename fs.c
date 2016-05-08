@@ -145,17 +145,17 @@ balloc(uint dev)
   panic("balloc: out of blocks");
 }
 
-// Allocate a zeroed disk block in the same block group as the given inode number i, if possible.
-// If not possible, try the next block, and so on.
+// Allocate a zeroed disk block in the given block group, if possible.
+// If not possible, return 0.
 static uint
-balloci(uint dev, uint inum)
+balloci(uint dev, uint bgroupnum)
 {
   int b, bi, m;
   struct buf *bp;
 
-  int firstblock = IBLOCKGROUPSTART(inum, sb);
+  int firstblock = BBLOCKGROUPSTART(bgroupnum, sb);
   
-  cprintf("balloci: dev: %d inum: %d firstblock: %d\n", dev, inum, firstblock);
+  cprintf("balloci: dev: %d bgroupnum: %d firstblock: %d\n", dev, bgroupnum, firstblock);
 
   // inode block number containing this inode
   b = firstblock + sb.bgroupmeta;
@@ -513,9 +513,12 @@ bmap(struct inode *ip, uint bn)
   uint addr, *a;
   struct buf *bp;
 
+  uint bgroupnum = IBLOCKGROUP(ip->inum, sb);
+
   if(bn < NDIRECT){
     if((addr = ip->addrs[bn]) == 0) {
-      uint blocknum = balloci(ip->dev, ip->inum);
+      cprintf("here1\n");
+      uint blocknum = balloci(ip->dev, bgroupnum);
       if (blocknum != 0)
         ip->addrs[bn] = addr = blocknum;
       else
@@ -528,7 +531,9 @@ bmap(struct inode *ip, uint bn)
   if(bn < NINDIRECT){
     // Load indirect block, allocating if necessary.
     if((addr = ip->addrs[NDIRECT]) == 0) {
-      uint blocknum = balloci(ip->dev, ip->inum);
+            cprintf("here2\n");
+
+      uint blocknum = balloci(ip->dev, bgroupnum);
       if (blocknum != 0)
         ip->addrs[NDIRECT] = addr = blocknum;
       else
@@ -537,7 +542,9 @@ bmap(struct inode *ip, uint bn)
     bp = bread(ip->dev, addr);
     a = (uint*)bp->data;
     if((addr = a[bn]) == 0){
-      uint blocknum = balloci(ip->dev, ip->inum);
+            cprintf("here3\n");
+
+      uint blocknum = balloci(ip->dev, bgroupnum);
       if (blocknum != 0)
         a[bn] = addr = blocknum;
       else
