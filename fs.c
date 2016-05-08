@@ -291,22 +291,46 @@ static struct inode* iget(uint dev, uint inum);
 // A free inode has a type of zero.
 // If the given type is of T_DIR, then we look for the least-utilized block
 // group, meaning the block group with the most free blocks.
+// If the given type is of T_FILE, we use given pinum to try and allocate
+// an inode int he same block group as the parent directory.
 struct inode*
-ialloc(uint dev, short type)
+ialloc(uint dev, short type, uint pinum)
 {
   int inum;
   struct buf *bp;
   struct dinode *dip;
 
-  int until = sb.ninodes;
+  int until = sb.ninodes; // loop until heere
   inum = 1;
 
   if (type == T_DIR) {
     int blockgroup = least_utilized_bgroup(); // get an inode from this block group
     inum = FIRSTINODEOFBGROUP(blockgroup, sb);
-    until = inum + sb.inodesperbgroup;
+    until = inum + sb.inodesperbgroup; // loop until the last inode in this block group
     if (inum == 0)
       inum = 1; // no inode 0
+  } else if (type == T_FILE) {
+    // try to find an inode in the same block group as pinum.
+    int blockgroup = IBLOCKGROUP(pinum, sb);
+    int start = FIRSTINODEOFBGROUP(blockgroup, sb);
+    int end = start + sb.inodesperbgroup;
+    if (start == 0)
+      start = 1; // no inode 0
+    int i;
+    for (i = start; i < end; i++) {
+      bp = bread(dev, IBLOCK(i, sb));
+      dip = (struct dinode*)bp->data + i%IPB;
+      if(dip->type == 0){  // a free inode
+        memset(dip, 0, sizeof(*dip));
+        dip->type = type;
+        log_write(bp);   // mark it allocated on the disk
+        brelse(bp);
+        return iget(dev, i);
+      }
+      brelse(bp);
+    }
+
+    // if we reach here, fall down to search all block groups for a free inode.
   }
 
   for(; inum < until; inum++){
@@ -321,6 +345,7 @@ ialloc(uint dev, short type)
     }
     brelse(bp);
   }
+
   panic("ialloc: no inodes");
 }
 
