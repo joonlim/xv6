@@ -159,7 +159,7 @@ main(int argc, char *argv[])
 
 
   // delete all created files and directories
-  printf(1, "Cleaning up...");
+  printf(1, "Cleaning up...\n");
   if (unlink(TESTDIR1"/"TESTFILE1) < 0 
     || unlink(TESTDIR1"/"TESTFILE2) < 0
     || unlink(TESTDIR1"/"TESTFILE3) < 0

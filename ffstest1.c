@@ -35,7 +35,7 @@ main(int argc, char *argv[])
 {
   printf(1, "This tests the first heurstic of the Fast File System.\n");
   printf(1, "As each directory is created, its inode is allocated in the least-utilized\n"\
-	"block group. To prove this point, this test creates 5 directories, which should\n"\
+	"block group. To prove this point, this test creates 3 directories, which should\n"\
 	"be allocated into different block groups. As each directory is created, this\n"\
 	"test outputs the amount of allocated data blocks in the block group that its\n"\
 	"inode is in. Each directory is deleted at the end of this test so that it can\n"\
@@ -52,7 +52,6 @@ main(int argc, char *argv[])
   bgstat(fbg.inodebgroup, &bg);
   printf(1, "allocated in block group %d\n", fbg.inodebgroup);
   printf(1, "Block group %d: allocated data blocks: %d\n", fbg.inodebgroup, bg.allocateddatablocks);
-  close(fd);
 
   // dir 2
   fd = makeandopendir(TESTDIR2);
@@ -60,7 +59,6 @@ main(int argc, char *argv[])
   bgstat(fbg.inodebgroup, &bg);
   printf(1, "allocated in block group %d\n", fbg.inodebgroup);
   printf(1, "Block group %d: allocated data blocks: %d\n", fbg.inodebgroup, bg.allocateddatablocks);
-  close(fd);
 
   // dir 3
   fd = makeandopendir(TESTDIR3);
@@ -68,27 +66,10 @@ main(int argc, char *argv[])
   bgstat(fbg.inodebgroup, &bg);
   printf(1, "allocated in block group %d\n", fbg.inodebgroup);
   printf(1, "Block group %d: allocated data blocks: %d\n", fbg.inodebgroup, bg.allocateddatablocks);
-  close(fd);
-
-  // dir 4
-  fd = makeandopendir(TESTDIR4);
-  fbgstat(fd, &fbg);
-  bgstat(fbg.inodebgroup, &bg);
-  printf(1, "allocated in block group %d\n", fbg.inodebgroup);
-  printf(1, "Block group %d: allocated data blocks: %d\n", fbg.inodebgroup, bg.allocateddatablocks);
-  close(fd);
-
-  // dir 5
-  fd = makeandopendir(TESTDIR5);
-  fbgstat(fd, &fbg);
-  bgstat(fbg.inodebgroup, &bg);
-  printf(1, "allocated in block group %d\n", fbg.inodebgroup);
-  printf(1, "Block group %d: allocated data blocks: %d\n", fbg.inodebgroup, bg.allocateddatablocks);
-  close(fd);
 
   // delete all created directories
-  printf(1, "Cleaning up...");
-  if (unlink(TESTDIR1) < 0 || unlink(TESTDIR2) < 0 || unlink(TESTDIR3) < 0 || unlink(TESTDIR4) < 0 || unlink(TESTDIR5) < 0) {
+  printf(1, "Cleaning up...\n");
+  if (unlink(TESTDIR1) < 0 || unlink(TESTDIR2) < 0 || unlink(TESTDIR3) < 0) {
   	printf(2, "failed to delete. Please git reset --hard (buggy test)\n");
   	exit();
   }
