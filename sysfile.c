@@ -472,6 +472,14 @@ sys_fsstat(void)
 int
 sys_bgstat(void)
 {
+  int bgnum;
+  struct bgstat *bg;
+
+  if(argint(0, &bgnum) < 0 || argptr(1, (void*)&bg, sizeof(*bg)) < 0)
+    return -1;
+
+  blockgroupstat(bgnum, bg);
+
   return 0;
 }
 
@@ -479,5 +487,13 @@ sys_bgstat(void)
 int
 sys_fbgstat(void)
 {
+  struct file *f;
+  struct fbgstat *fbg;
+  
+  if(argfd(0, 0, &f) < 0 || argptr(1, (void*)&fbg, sizeof(*fbg)) < 0)
+    return -1;
+
+  filebgstat(f, fbg);
+
   return 0;
 }

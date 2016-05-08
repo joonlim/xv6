@@ -1,6 +1,8 @@
 struct stat;
 struct rtcdate;
 struct superblock;
+struct bgstat;
+struct fbgstat;
 
 // system calls
 int fork(void);
@@ -28,6 +30,8 @@ int wolfie(void* buf, uint size);
 int nice(int inc);
 uint random(void);
 int fsstat(struct superblock*);
+int bgstat(int, struct bgstat*);
+int fbgstat(int, struct fbgstat*);
 
 // ulib.c
 int stat(char*, struct stat*);

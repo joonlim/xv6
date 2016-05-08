@@ -47,6 +47,22 @@ struct dinode {
   uint addrs[NDIRECT+1];   // Data block addresses
 };
 
+// Used to hold information about a block group to be used with system call bgstat().
+struct bgstat {
+  uint bgnum;         // Block group number
+  uint firstblocknum; // Number of first block in this block group
+  uint allocatedinodes; // Number of allocated inodes in this block group
+  uint allocateddatablocks; // Number of allocated data blocks in this block group
+};
+
+// Used to hold information about a file's blocks to be used with system call fbgstat().
+struct fbgstat {
+  uint inum;          // Inode number
+  uint inodebgroup;   // Block group number that the inode belongs to
+  uint ndatablocks;   // Number of data blocks allocated for this file
+  uint datablockbgroups[NDIRECT + NINDIRECT]; // Block group number of each data block in this group.
+};
+
 // Inodes per block.
 #define IPB           (BSIZE / sizeof(struct dinode))
 
@@ -63,7 +79,7 @@ struct dinode {
 // #define IBLOCK(i, sb)     ((i) / IPB + sb.inodestart)
 #define IBLOCK(i, sb)      (IBLOCKGROUPSTART((i), sb) + ((i) % sb.inodeblocksperbgroup))
 
-// First and last inodes of the given block group
+// First inode of the given block group
 #define FIRSTINODEOFBGROUP(b, sb)  ((b) * sb.inodesperbgroup)
 
 // Bitmap bits per block

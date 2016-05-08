@@ -8,6 +8,8 @@ struct rtcdate;
 struct spinlock;
 struct stat;
 struct superblock;
+struct bgstat;
+struct fbgstat;
 
 // bio.c
 void            binit(void);
@@ -51,6 +53,8 @@ struct inode*   nameiparent(char*, char*);
 int             readi(struct inode*, char*, uint, uint);
 void            stati(struct inode*, struct stat*);
 int             writei(struct inode*, char*, uint, uint);
+void            blockgroupstat(int, struct bgstat*);
+void            filebgstat(struct file*, struct fbgstat*);;
 
 // ide.c
 void            ideinit(void);

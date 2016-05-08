@@ -32,5 +32,12 @@ main(int argc, char *argv[])
   printf(1, "  bmap blocks per block group: %d\n", sb.bmapblocksperbgroup);
   printf(1, "  data blocks per block group: %d\n\n", sb.datablocksperbgroup);
 
+  struct bgstat bg;
+  int i;
+  for (i = 0; i < sb.nblockgroups; i++) {
+    bgstat(i, &bg);
+    printf(1, "Block group %d: first block: %d, allocated data blocks: %d\n", i, bg.firstblocknum, bg.allocateddatablocks);
+  }
+
   exit();
 }
