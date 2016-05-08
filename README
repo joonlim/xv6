@@ -1,0 +1,67 @@
+Joon Lim
+109558002
+Lab 4
+
+Design Document
+
+Exercise 1
+
+		- First, I did a lot of reading and planning and complaining before even knowing where to begin.
+
+		- I added several new fields to the struct superblock and removed inodestart and bmapstart:
+
+			+  uint nblockgroups; // Number of block groups
+			+  uint bgroupstart;  // Block number of the first block of the first block group
+			+  uint bgroupsize;   // Size of a block group
+			+  uint inodesperbgroup; // Inodes per block group
+			+  uint inodeblocksperbgroup; // Inode blocks per block group
+			+  uint bmapblocksperbgroup; // Bit map blocks per block group
+			+  uint datablocksperbgroup; // Number of data blocks per block group
+			+  uint bgroupmeta; // Number of blocks for metadata per block group = inodeblocksperbgroup + bmapblocksperbgroup
+
+		- I chose easy numbers to work with for the size of the file system (4096 * 64 + 2 + nlog), number of inodes (512), number of block groups (64), so that the block group size would be 4096 blocks.
+
+		- Most of my design was in adding/editting the macros in fs.h:
+
+			+  IBLOCKGROUP(i, sb) // Block group contianing inode i
+			+  IBLOCKGROUPSTART(i, sb) // Starting block of block group containing inode i
+			+  BBLOCKGROUPSTART(b, sb) // Starting block of block group given block group number
+			+  IBLOCK(i, sb) // Block containing inode i (redefined)
+			+  FIRSTINODEOFBGROUP(b, sb) // First inode of the given block group
+			+  BISVALID(b, sb) // Check if this block number is a valid data block
+			+  BGROUP(b, sb) // Which group a block number is in
+			+  BBLOCK(b, sb) // Block of free map containing bit for block b (redefined)
+			+  BOFFSET(b, sb) // Offset bit inside bitmap block that contains bit for block b
+
+		- I then editted balloc() and bfree() to take into account the fact that each block group has its own block(s) of bitmaps.
+
+		- I added a new function, balloci(), which at this point took the inumber of the inode as input to allocate a block in the same block group as the inode. In the function that calls balloc(), which is bmap(), I added calls to balloci(), and fallback calls to balloc() if balloci() fails to find a free block inside the block group.
+
+		- I made sure my file system worked using print statements in balloci() and bfree().
+
+Exercise 2
+
+		- I completed the first heuristic by adding a function least_utilized_bgroup and a call to it in ialloc if the inode being allocated is for a directory. This is so that new directories will be in the least utilized block group.
+
+		- For the second heuristic, I revised ialloc() to take a parent directory's inumber so that it can try to create files in the same directory in the same block group. I also editted by balloci() function to take a block group number rather than an inode number to help.
+
+		- Chunking was easily added in the bmap() function. I added 2 lines to increment the group number being passed to balloci() and to loop back to 0 if we pass the limit. I made the chunk size try to be equal to NDIRECT, which is 12.
+
+
+Exercise 3
+
+		- I first added 3 system calls to help aid with testing:
+
+			+  int fsstat(struct superblock*) // used to copy the superblock of the file system
+			+  int bgstat(int, struct bgstat*) // used to acquire info about a certain block group
+			+  int fbgstat(int, struct fbgstat*) // used to acquire info about a given file's blocks
+
+		- The first test is ffs.c, which simply outputs the info contained within the superblock and shows the statistics of each block group.
+
+		- The second test is ffstest1.c, which tests the first heuristic by creating 3 directories and making sure that they are all in the least-utilized block groups.
+
+		- The third test is ffstest2.c, which tests the second heuristic by creating 2 directories and 5 files in each and making sure that the files in the same directory are usually in the same block group.
+
+		- The fourth test is ffstest3.c, which tests the third heuristic by creating a large file and displaying the block group of each of its data blocks.
+
+		- After that, I spent some more time fixing small syntax errors and removing print statements that were no longer needed.
