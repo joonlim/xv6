@@ -93,7 +93,7 @@ struct fbgstat {
 
 // Block of free map containing bit for block b
 // #define BBLOCK(b, sb) (b/BPB + sb.bmapstart)
-#define BBLOCK(b, sb)  (BGROUP(b, sb) + sb.inodeblocksperbgroup + (((b) - 32) % sb.bgroupsize) / BPB)
+#define BBLOCK(b, sb)  (BGROUP(b, sb) + sb.inodeblocksperbgroup + (((b) - sb.bgroupmeta) % sb.bgroupsize) / BPB)
 
 // Offset bit inside bitmap block that contains bit for block b
 #define BOFFSET(b, sb)  (((b) - sb.bgroupstart - sb.bgroupmeta) % BPB)
