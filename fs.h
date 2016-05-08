@@ -16,8 +16,19 @@ struct superblock {
   uint ninodes;      // Number of inodes.
   uint nlog;         // Number of log blocks
   uint logstart;     // Block number of first log block
-  uint inodestart;   // Block number of first inode block
-  uint bmapstart;    // Block number of first free map block
+  // uint inodestart;   // Block number of first inode block
+  // uint bmapstart;    // Block number of first free map block
+
+  uint nblockgroups; // Number of block groups
+  uint bgroupstart;  // Block number of the first block of the first block group
+  uint bgroupsize;   // Size of a block group
+  uint inodesperbgroup; // Inodes per block group
+  uint inodeblocksperbgroup; // Inode blocks per block group
+
+  uint bmapblocksperbgroup; // Bit map blocks per block group
+  uint datablocksperbgroup; // Number of data blocks per block group
+
+  uint bgroupmeta; // Number of blocks for metadata per block group = inodeblocksperbgroup + bmapblocksperbgroup
 };
 
 #define NDIRECT 12
@@ -37,14 +48,34 @@ struct dinode {
 // Inodes per block.
 #define IPB           (BSIZE / sizeof(struct dinode))
 
+// Block group containing inode i
+#define IBLOCKGROUP(i, sb)   ((i) / sb.inodesperbgroup)
+
+// Starting block of block group containing inode i
+#define IBLOCKGROUPSTART(i, sb)  (sb.bgroupstart + (IBLOCKGROUP((i), sb) * sb.bgroupsize))
+
+// Starting block of block group given block group number
+#define BBLOCKGROUPSTART(b, sb)  (sb.bgroupstart + ((b) * sb.bgroupsize))
+
 // Block containing inode i
-#define IBLOCK(i, sb)     ((i) / IPB + sb.inodestart)
+// #define IBLOCK(i, sb)     ((i) / IPB + sb.inodestart)
+#define IBLOCK(i, sb)      (IBLOCKGROUPSTART((i), sb) + ((i) % sb.inodeblocksperbgroup))
 
 // Bitmap bits per block
 #define BPB           (BSIZE*8)
 
+// Check if this block number is a valid data block
+#define BISVALID(b, sb) (sb.bgroupstart < (b) && ((b) - sb.bgroupstart) % sb.bgroupsize >= (sb.bgroupmeta)) ? 1 : 0)
+
+// Which group a block number is in
+#define BGROUP(b, sb)  (((b) - sb.bgroupstart) / sb.bgroupstart)
+
 // Block of free map containing bit for block b
-#define BBLOCK(b, sb) (b/BPB + sb.bmapstart)
+// #define BBLOCK(b, sb) (b/BPB + sb.bmapstart)
+#define BBLOCK(b, sb)  (BGROUP(b, sb) + sb.inodeblocksperbgroup + (((b) - 32) % sb.bgroupsize) / BPB)
+
+// Offset bit inside bitmap block that contains bit for block b
+#define BOFFSET(b, sb)  (((b) - sb.bgroupstart - sb.bgroupmeta) % BPB)
 
 // Directory is a file containing a sequence of dirent structures.
 #define DIRSIZ 14
