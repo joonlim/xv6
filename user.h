@@ -1,5 +1,6 @@
 struct stat;
 struct rtcdate;
+struct superblock;
 
 // system calls
 int fork(void);
@@ -26,6 +27,7 @@ int uptime(void);
 int wolfie(void* buf, uint size);
 int nice(int inc);
 uint random(void);
+int fsstat(struct superblock*);
 
 // ulib.c
 int stat(char*, struct stat*);

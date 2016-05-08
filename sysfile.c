@@ -440,3 +440,44 @@ sys_pipe(void)
   fd[1] = fd1;
   return 0;
 }
+
+// File system stat. Fill a struct buffer with the contents of struct superblock sb.
+int
+sys_fsstat(void)
+{
+  struct superblock *s;
+  
+  if(argptr(0, (void*)&s, sizeof(*s)) < 0)
+    return -1;
+
+  // fill buffer with contents of sb
+  s->size = sb.size;
+  s->nblocks = sb.nblocks;
+  s->ninodes = sb.ninodes;
+  s->nlog = sb.nlog;
+  s->logstart = sb.logstart;
+  s->nblockgroups = sb.nblockgroups;
+  s->bgroupstart = sb.bgroupstart;
+  s->bgroupsize = sb.bgroupsize;
+  s->inodesperbgroup = sb.inodesperbgroup;
+  s->inodeblocksperbgroup = sb.inodeblocksperbgroup;
+  s->bmapblocksperbgroup = sb.bmapblocksperbgroup;
+  s->datablocksperbgroup = sb.datablocksperbgroup;
+  s->bgroupmeta = sb.bgroupmeta;
+
+  return 0;
+}
+
+// Block group stat. Given a block group number, fill a buffer with statistics regarding it.
+int
+sys_bgstat(void)
+{
+  return 0;
+}
+
+// File block group stat. Given a file and a block group number, fill a buffer with statistics regarding it.
+int
+sys_fbgstat(void)
+{
+  return 0;
+}

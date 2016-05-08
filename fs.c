@@ -22,7 +22,6 @@
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 static void itrunc(struct inode*);
-struct superblock sb;   // there should be one per dev, but we run with one dev
 
 // Return the block number of the least utilized block group to be used whenever a new directory is created.
 int least_utilized_bgroup() {

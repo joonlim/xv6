@@ -77,12 +77,15 @@ argstr(int n, char **pp)
   return fetchstr(addr, pp);
 }
 
+extern int sys_bgstat(void);
 extern int sys_chdir(void);
 extern int sys_close(void);
 extern int sys_dup(void);
 extern int sys_exec(void);
 extern int sys_exit(void);
+extern int sys_fbgstat(void);
 extern int sys_fork(void);
+extern int sys_fsstat(void);
 extern int sys_fstat(void);
 extern int sys_getpid(void);
 extern int sys_kill(void);
@@ -126,7 +129,10 @@ static int (*syscalls[])(void) = {
 [SYS_close]   sys_close,
 [SYS_wolfie]  sys_wolfie,
 [SYS_nice]    sys_nice,
-[SYS_random]  sys_random
+[SYS_random]  sys_random,
+[SYS_fsstat]  sys_fsstat,
+[SYS_bgstat]  sys_bgstat,
+[SYS_fbgstat]  sys_fbgstat
 };
 
 void

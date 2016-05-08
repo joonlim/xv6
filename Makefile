@@ -180,6 +180,7 @@ UPROGS=\
 	_lottery1\
 	_lottery2\
 	_lottery3\
+	_ffs\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)

@@ -31,6 +31,8 @@ struct superblock {
   uint bgroupmeta; // Number of blocks for metadata per block group = inodeblocksperbgroup + bmapblocksperbgroup
 };
 
+struct superblock sb;   // there should be one per dev, but we run with one dev
+
 #define NDIRECT 12
 #define NINDIRECT (BSIZE / sizeof(uint))
 #define MAXFILE (NDIRECT + NINDIRECT)
